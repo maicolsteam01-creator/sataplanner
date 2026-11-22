@@ -36,6 +36,17 @@ export interface Doc {
   };
 }
 
+/**
+ * Perfil local. Fase 1: sin cuenta y sin backend. El id `local-default`
+ * absorbe todos los planos creados antes de esta función.
+ */
+export interface Profile {
+  id: string;
+  name: string;
+  createdAt: string;
+  kind: 'local' | 'cloud';
+}
+
 export interface Prefs {
   lang: Lang;
   view: ViewMode;
@@ -46,4 +57,6 @@ export interface Prefs {
   art?: boolean;
   /** Resaltar los problemas del Design Check en el lienzo. */
   showIssues?: boolean;
+  /** Perfil activo; los planos se filtran por él. */
+  activeProfileId?: string;
 }

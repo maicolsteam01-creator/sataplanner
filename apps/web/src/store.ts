@@ -2,9 +2,20 @@ import { create } from 'zustand';
 import type { ProductionPlan } from '@sataplanner/engine';
 import { sampleGameData } from '@sataplanner/game-data';
 import { detectLang } from './i18n';
-import { deletePlan, listPlans, loadPlan, savePlan, type PlanMeta } from './lib/library';
+import {
+  DEFAULT_PROFILE_ID,
+  deletePlan,
+  listPlans,
+  listProfiles,
+  loadPlan,
+  markPlanPublished,
+  renameProfile as renameStoredProfile,
+  savePlan,
+  saveProfile,
+  type PlanMeta,
+} from './lib/library';
 import { planToDoc } from './lib/planAdapter';
-import type { Doc, Lang, PlacedNode, Prefs, ViewMode, Wire } from './types';
+import type { Doc, Lang, PlacedNode, Prefs, Profile, ViewMode, Wire } from './types';
 
 const DOC_KEY = 'sataplanner.doc.v1';
 const PREFS_KEY = 'sataplanner.prefs.v1';
@@ -87,6 +98,7 @@ function loadPrefs(): Prefs {
     frame: saved?.frame === 6 ? 6 : 4,
     art: saved?.art ?? true,
     showIssues: saved?.showIssues ?? false,
+    activeProfileId: saved?.activeProfileId ?? DEFAULT_PROFILE_ID,
   };
 }
 
@@ -129,6 +141,10 @@ export interface AppState extends Prefs {
   /** Biblioteca local (IndexedDB) y plano activo. */
   library: PlanMeta[];
   activePlanId: string | null;
+  /** Perfiles locales. La nube se agregará en una fase posterior. */
+  profiles: Profile[];
+  /** Prefs lo declara opcional para planos guardados antes de esta función. */
+  activeProfileId: string;
 
   addNode: (buildingId: string, at?: { x: number; y: number }) => void;
   select: (id: string | null) => void;
@@ -161,6 +177,11 @@ export interface AppState extends Prefs {
   saveCurrentPlan: () => Promise<void>;
   openPlan: (id: string) => Promise<void>;
   removePlan: (id: string) => Promise<void>;
+  setActiveProfile: (id: string) => void;
+  renameProfile: (name: string) => Promise<void>;
+  createProfile: (name: string) => Promise<void>;
+  /** Guarda el plano en el perfil activo y lo marca como publicado. */
+  publishCurrentPlan: () => Promise<void>;
   applyProductionPlan: (plan: ProductionPlan, mode: 'replace' | 'append') => void;
 }
 
@@ -195,16 +216,27 @@ export const useAppStore = create<AppState>()((set, get) => {
   };
 
   const persistPrefs = () => {
-    const { lang, view, grid, snap, frame, art, showIssues } = get();
-    savePrefs({ lang, view, grid, snap, frame, art, showIssues });
+    const { lang, view, grid, snap, frame, art, showIssues, activeProfileId } = get();
+    savePrefs({ lang, view, grid, snap, frame, art, showIssues, activeProfileId });
   };
 
   const refreshLibrary = async () => {
-    set({ library: await listPlans() });
+    const profiles = await listProfiles();
+    const current = get().activeProfileId;
+    const activeProfileId = profiles.some((profile) => profile.id === current)
+      ? current
+      : DEFAULT_PROFILE_ID;
+    set({
+      profiles,
+      activeProfileId,
+      library: await listPlans(activeProfileId),
+    });
+    if (activeProfileId !== current) persistPrefs();
   };
 
   return {
     ...prefs,
+    activeProfileId: prefs.activeProfileId ?? DEFAULT_PROFILE_ID,
     doc: loadDoc(),
     selectedId: null,
     connectFrom: null,
@@ -219,6 +251,7 @@ export const useAppStore = create<AppState>()((set, get) => {
     future: [],
     library: [],
     activePlanId: null,
+    profiles: [],
 
     addNode: (buildingId, at) => {
       const building = sampleGameData.buildings.find((b) => b.id === buildingId);
@@ -424,7 +457,7 @@ export const useAppStore = create<AppState>()((set, get) => {
 
     saveCurrentPlan: async () => {
       const state = get();
-      const meta = await savePlan(state.doc, state.activePlanId ?? undefined);
+      const meta = await savePlan(state.doc, state.activePlanId ?? undefined, state.activeProfileId);
       if (meta) set({ activePlanId: meta.id });
       await refreshLibrary();
     },
@@ -439,6 +472,41 @@ export const useAppStore = create<AppState>()((set, get) => {
     removePlan: async (id) => {
       await deletePlan(id);
       if (get().activePlanId === id) set({ activePlanId: null });
+      await refreshLibrary();
+    },
+
+    setActiveProfile: (id) => {
+      set({ activeProfileId: id, activePlanId: null });
+      persistPrefs();
+      void refreshLibrary();
+    },
+
+    renameProfile: async (name) => {
+      await renameStoredProfile(get().activeProfileId, name);
+      await refreshLibrary();
+    },
+
+    createProfile: async (name) => {
+      const clean = name.trim().slice(0, 40);
+      if (!clean) return;
+      const profile: Profile = {
+        id: uid('profile'),
+        name: clean,
+        createdAt: now(),
+        kind: 'local',
+      };
+      await saveProfile(profile);
+      set({ activeProfileId: profile.id, activePlanId: null });
+      persistPrefs();
+      await refreshLibrary();
+    },
+
+    publishCurrentPlan: async () => {
+      const state = get();
+      const meta = await savePlan(state.doc, state.activePlanId ?? undefined, state.activeProfileId);
+      if (!meta) return;
+      set({ activePlanId: meta.id });
+      await markPlanPublished(meta.id);
       await refreshLibrary();
     },
 

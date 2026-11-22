@@ -40,6 +40,12 @@ export function TopBar({
   const showRight = useAppStore((s) => s.showRight);
   const toggleLeft = useAppStore((s) => s.toggleLeft);
   const toggleRight = useAppStore((s) => s.toggleRight);
+  const profiles = useAppStore((s) => s.profiles);
+  const activeProfileId = useAppStore((s) => s.activeProfileId);
+  const setActiveProfile = useAppStore((s) => s.setActiveProfile);
+  const renameProfile = useAppStore((s) => s.renameProfile);
+  const createProfile = useAppStore((s) => s.createProfile);
+  const publishCurrentPlan = useAppStore((s) => s.publishCurrentPlan);
 
   const analysis = useAnalysis();
   const [toast, setToast] = useState('');
@@ -129,6 +135,32 @@ export function TopBar({
     }
   };
 
+  const profile = profiles.find((item) => item.id === activeProfileId);
+  const profileInitial = (profile?.name ?? t('profile.local')).trim().charAt(0).toUpperCase() || 'L';
+
+  const publish = async () => {
+    closeMenu();
+    try {
+      await publishCurrentPlan();
+      notify(t('publish.done'));
+      onOpenShare?.();
+    } catch {
+      onOpenShare?.();
+    }
+  };
+
+  const renameCurrentProfile = () => {
+    closeMenu();
+    const name = window.prompt(t('profile.name'), profile?.name ?? t('profile.local'));
+    if (name?.trim()) void renameProfile(name);
+  };
+
+  const addProfile = () => {
+    closeMenu();
+    const name = window.prompt(t('profile.name'), '');
+    if (name?.trim()) void createProfile(name);
+  };
+
   return (
     <header className="topbar">
       <button
@@ -175,6 +207,40 @@ export function TopBar({
         </button>
         <button type="button" className="icon-btn" onClick={redo} disabled={!canRedo} title={t('top.redo')}>
           ↷
+        </button>
+
+        <details className="menu profile-menu">
+          <summary className="btn btn-profile" title={t('profile.title')}>
+            <span className="profile-avatar" aria-hidden="true">{profileInitial}</span>
+            <span className="profile-name">{profile?.name ?? t('profile.local')}</span>
+          </summary>
+          <div className="menu-panel">
+            {profiles.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={item.id === activeProfileId ? 'is-current' : undefined}
+                onClick={() => {
+                  if (item.id !== activeProfileId) setActiveProfile(item.id);
+                  closeMenu();
+                }}
+              >
+                <span>{item.name}</span>
+                <em>{item.id === activeProfileId ? t('profile.title') : t('profile.local')}</em>
+              </button>
+            ))}
+            <div className="menu-sep" />
+            <button type="button" onClick={renameCurrentProfile}>
+              <span>{t('profile.rename')}</span>
+            </button>
+            <button type="button" onClick={addProfile}>
+              <span>{t('profile.create')}</span>
+            </button>
+          </div>
+        </details>
+
+        <button type="button" className="btn btn-publish" onClick={() => void publish()} title={t('publish.hint')}>
+          ⤴ <span>{t('publish.button')}</span>
         </button>
 
         <button

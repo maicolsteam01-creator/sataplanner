@@ -37,6 +37,10 @@ Primera rebanada vertical funcionando (S0 + parte de S1/S2):
   abrir y borrar planos, importar JSON y plantillas de arranque.
 - **Arte procedural propio** por edificio, en UI, canvas y SVG; se puede apagar.
 - **PWA instalable** con caché offline y **tarjeta PNG con QR** del link `#p=`.
+- **Perfiles locales** (`local-default` + espacios adicionales) con los planos
+  etiquetados por perfil; los planos anteriores se migran automáticamente.
+- Botón **Publicar**: guarda el plano en el perfil activo, lo marca como
+  publicado y abre la tarjeta con el link `#p=` y su QR. Sigue sin haber backend.
 
 ## Comandos
 
@@ -151,7 +155,17 @@ abre el celular en la misma WiFi. Si no carga:
 
 ### 2. Publicar en internet (gratis, HTTPS automático)
 
-**Cloudflare Pages — Direct Upload** (recomendado, no hace falta git):
+**GitHub Pages (destino actual)** — URL:
+<https://maicolsteam01-creator.github.io/sataplanner/>
+
+El repo `maicolsteam01-creator/sataplanner` es público (requisito de Pages en
+plan Free). `.github/workflows/deploy.yml` corre en cada push a `main`:
+`npm ci` → `typecheck` → `test` → `build` → `upload-pages-artifact` →
+`deploy-pages`. Para actualizar la app alcanza con hacer push; GitHub publica
+solo si pasan los chequeos. El build usa `base: './'`, así que funciona en el
+subdirectorio `/sataplanner/` sin cambiar rutas.
+
+**Cloudflare Pages — Direct Upload** (alternativa, no hace falta git):
 
 1. `npm run build`
 2. Cloudflare Dashboard → *Workers & Pages* → *Create* → *Pages* → *Upload assets*.
@@ -185,9 +199,10 @@ npx cloudflared tunnel --url http://localhost:4173
 Da una URL `https://algo.trycloudflare.com` con HTTPS, sin cuenta. Se apaga al
 cerrar la terminal.
 
-### 4. Actualizaciones automáticas (opcional)
+### 4. Actualizaciones automáticas
 
-Con el repo en GitHub, Cloudflare Pages / Netlify se conectan por Git:
+En GitHub Pages ya está configurado el workflow anterior. En Cloudflare Pages /
+Netlify se conecta el repo por Git:
 
 - Build command: `npm run build`
 - Output directory: `apps/web/dist`
@@ -226,13 +241,27 @@ Exportalo como **JSON** o **link** y reimportalo en el dominio nuevo.
 | S4 Export | ✅ SVG, PNG 2×, PDF, JSON, link comprimido y tarjeta QR |
 | S5 Arte + i18n | ✅ arte procedural propio + ES/EN/JA |
 | S6 Móvil + PWA | ✅ responsive + service worker offline |
-| S7 QA + release | 🟡 verificación local lista; falta elegir hosting/dominio |
+| S7 QA + release | 🟡 deploy 24/7 en GitHub Pages; dominio propio pendiente |
+| S8 Perfil + publicación | ✅ perfil local, planos por perfil, botón Publicar con link/QR |
+
+## Perfil local y publicación
+
+La barra superior muestra el espacio activo (`Mi espacio local` por defecto).
+Desde ahí se pueden crear espacios, renombrarlos y cambiar entre ellos. Cada
+plano guardado queda asociado al espacio activo y la pestaña **Planos** muestra
+si está publicado o en borrador. Los planos creados antes de esta función se
+migran al espacio `local-default` al abrir la biblioteca.
+
+**Publicar** guarda el plano actual, lo marca como publicado y abre la tarjeta
+con el link `#p=` y su QR. El link sigue viajando comprimido en el fragmento:
+no hay servidor, no se sube el plano y no hace falta cuenta. Una fase futura
+podrá sumar cuentas opcionales mediante un adapter de nube; hoy no existe.
 
 ## Próximos pasos inmediatos
 
 1. Reemplazar el dataset semilla por el importado y curar footprints (hoy todo
    `verified: false`; es el cuello de botella para precisión real).
-2. Elegir destino final: Cloudflare Pages o Netlify, y dominio propio.
-3. Opcional: inicializar git y CI con `npm run typecheck && npm run test && npm run build`.
+2. Decidir si se quiere dominio propio apuntando a GitHub Pages.
+3. Fase 2 de perfiles: cuenta opcional y backend a elegir (sin afectar el modo local).
 4. Benchmark de render con planos grandes y prueba en móvil real.
 5. Verificar el service worker tras cada deploy (caché / versión).

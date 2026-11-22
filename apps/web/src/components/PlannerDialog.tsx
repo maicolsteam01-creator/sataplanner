@@ -25,6 +25,8 @@ export function PlannerDialog({ open, onClose }: { open: boolean; onClose: () =>
   const frame = useAppStore((s) => s.frame);
   const floor = useAppStore((s) => s.floor);
   const library = useAppStore((s) => s.library);
+  const profiles = useAppStore((s) => s.profiles);
+  const activeProfileId = useAppStore((s) => s.activeProfileId);
   const showIssues = useAppStore((s) => s.showIssues);
   const toggleIssues = useAppStore((s) => s.toggleIssues);
   const saveCurrentPlan = useAppStore((s) => s.saveCurrentPlan);
@@ -441,6 +443,9 @@ export function PlannerDialog({ open, onClose }: { open: boolean; onClose: () =>
             <section className="planner-section">
               <h3>{t('lib.title')}</h3>
               <p className="muted">{t('lib.hint')}</p>
+              <p className="muted">
+                {t('lib.profile')}: <strong>{profiles.find((p) => p.id === activeProfileId)?.name ?? t('profile.local')}</strong>
+              </p>
 
               <div className="field">
                 <label htmlFor="lib-name">{t('lib.name')}</label>
@@ -482,7 +487,10 @@ export function PlannerDialog({ open, onClose }: { open: boolean; onClose: () =>
                         <strong>{item.name}</strong>
                         <small>
                           {item.nodes} {t('status.nodes')} ·{' '}
-                          {new Date(item.updatedAt).toLocaleString(lang)}
+                          {new Date(item.updatedAt).toLocaleString(lang)} ·{' '}
+                          <span className={item.publishedAt ? 'tag-published' : 'tag-draft'}>
+                            {item.publishedAt ? t('lib.published') : t('lib.draft')}
+                          </span>
                         </small>
                       </div>
                       <button
