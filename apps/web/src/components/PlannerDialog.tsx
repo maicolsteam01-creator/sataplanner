@@ -56,7 +56,7 @@ export function PlannerDialog({ open, onClose }: { open: boolean; onClose: () =>
   const buildingName = (id: string): string =>
     localized(sampleGameData.buildings.find((b) => b.id === id)?.name ?? { en: id }, lang);
   const artKind = (id: string): string =>
-    sampleGameData.buildings.find((b) => b.id === id)?.icon ?? 'default';
+    id === 'miner-mk1' ? 'miner-mk1' : sampleGameData.buildings.find((b) => b.id === id)?.icon ?? 'default';
 
   const targetItems = useMemo(
     () =>

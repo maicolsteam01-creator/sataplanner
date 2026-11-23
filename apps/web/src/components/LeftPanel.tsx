@@ -123,7 +123,11 @@ export function LeftPanel() {
           <div className="inspector">
             <div className="inspector-head">
               <span className="dot" style={{ background: category?.color }} />
-              <Glyph kind={building.icon} size={22} color={category?.color} />
+              <Glyph
+                kind={building.id === 'miner-mk1' ? 'miner-mk1' : building.icon}
+                size={22}
+                color={category?.color}
+              />
               <div>
                 <strong>{localized(building.name, lang)}</strong>
                 <small>

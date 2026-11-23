@@ -36,6 +36,9 @@ Primera rebanada vertical funcionando (S0 + parte de S1/S2):
 - **Biblioteca local** (IndexedDB con respaldo en `localStorage`): guardar,
   abrir y borrar planos, importar JSON y plantillas de arranque.
 - **Arte procedural propio** por edificio, en UI, canvas y SVG; se puede apagar.
+- **Logo del Minero Mk.1**: la imagen `Miner_Mk.1.webp` se usa como icono del
+  edificio en catálogo/inspector, se dibuja dentro del nodo en el lienzo y viaja
+  incrustada en el SVG/PNG/PDF exportado (sin archivos externos).
 - **PWA instalable** con caché offline y **tarjeta PNG con QR** del link `#p=`.
 - **Perfiles locales** (`local-default` + espacios adicionales) con los planos
   etiquetados por perfil; los planos anteriores se migran automáticamente.
@@ -57,9 +60,9 @@ npm run preview    # sirve el build en http://localhost:4173
 
 ```
 apps/web                 React + Vite + lienzo Canvas 2D
-apps/web/src/lib/        draw, export, library, docIO, planAdapter, shareCard, templates
+apps/web/src/lib/        draw, export, library, docIO, planAdapter, shareCard, templates, minerLogo
 apps/web/src/components/ PlannerDialog, ShareCardDialog, BuildingArt, Glyph...
-apps/web/public/         sw.js, manifest, _headers, íconos, og.png
+apps/web/public/         sw.js, manifest, _headers, íconos, og.png, miner-mk1.webp
 packages/game-data       contrato de tipos + dataset semilla
 packages/engine          cálculo puro (sin UI), testeado con Vitest
 packages/engine/src/plan.ts        solver inverso, fases y Design Check

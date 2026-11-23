@@ -70,7 +70,10 @@ export function RightPanel() {
                 title={t('right.add')}
               >
                 <span className="catalog-glyph" style={{ color: category.color }}>
-                  <Glyph kind={building.icon} size={26} />
+                  <Glyph
+                    kind={building.id === 'miner-mk1' ? 'miner-mk1' : building.icon}
+                    size={26}
+                  />
                 </span>
                 <span className="catalog-text">
                   <strong>{localized(building.name, lang)}</strong>

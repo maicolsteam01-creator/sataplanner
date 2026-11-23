@@ -4,6 +4,7 @@ import { buildingById, sampleGameData } from '@sataplanner/game-data';
 import { useAppStore } from '../store';
 import { useT } from '../hooks';
 import { drawScene } from '../lib/draw';
+import { onMinerLogoReady } from '../lib/minerLogo';
 import {
   clamp,
   hitTest,
@@ -30,6 +31,7 @@ export function Stage() {
 
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [dropping, setDropping] = useState(false);
+  const [logoReadyTick, setLogoReadyTick] = useState(0);
   const t = useT();
 
   const nodes = useAppStore((s) => s.doc.nodes);
@@ -111,6 +113,8 @@ export function Stage() {
     return () => canvas.removeEventListener('wheel', handler);
   }, []);
 
+  useEffect(() => onMinerLogoReady(() => setLogoReadyTick((tick) => tick + 1)), []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !viewport.w || !viewport.h) return;
@@ -156,6 +160,7 @@ export function Stage() {
     showIssues,
     issues,
     viewport,
+    logoReadyTick,
   ]);
 
   const localPoint = (event: { clientX: number; clientY: number }) => {
