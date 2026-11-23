@@ -10,6 +10,7 @@ import { useT } from '../hooks';
 import { useAppStore } from '../store';
 import { downloadBlob } from '../lib/export';
 import { parseDocJson } from '../lib/docIO';
+import { logoKindForBuilding } from '../lib/minerLogo';
 import { TEMPLATES, templateDoc } from '../lib/templates';
 import { BuildingArt } from './BuildingArt';
 
@@ -56,7 +57,9 @@ export function PlannerDialog({ open, onClose }: { open: boolean; onClose: () =>
   const buildingName = (id: string): string =>
     localized(sampleGameData.buildings.find((b) => b.id === id)?.name ?? { en: id }, lang);
   const artKind = (id: string): string =>
-    id === 'miner-mk1' ? 'miner-mk1' : sampleGameData.buildings.find((b) => b.id === id)?.icon ?? 'default';
+    logoKindForBuilding(id) ??
+    sampleGameData.buildings.find((b) => b.id === id)?.icon ??
+    'default';
 
   const targetItems = useMemo(
     () =>

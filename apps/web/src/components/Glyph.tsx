@@ -1,10 +1,10 @@
 import { artFor } from '../lib/buildingArt';
-import { MINER_LOGO_DATA_URL, MINER_LOGO_KIND } from '../lib/minerLogo';
+import { logoDataUrl, logoKindForBuilding } from '../lib/minerLogo';
 
 /**
  * Glifo compacto de edificio. La forma depende del `icon` del building data;
  * el dibujo vive en el catálogo procedural compartido con BuildingArt.
- * El Minero Mk.1 usa su logo raster sobre un calco técnico tenue.
+ * Los Mineros Mk.1 y Mk.2 usan su logo raster sobre un calco técnico tenue.
  */
 export function Glyph({
   kind,
@@ -15,7 +15,7 @@ export function Glyph({
   size?: number;
   color?: string;
 }) {
-  const isLogo = kind === MINER_LOGO_KIND;
+  const logoKind = logoKindForBuilding(kind);
   return (
     <svg
       viewBox="0 0 32 32"
@@ -28,8 +28,8 @@ export function Glyph({
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <g opacity={isLogo ? 0.25 : 1}>
-        {artFor(isLogo ? 'miner' : kind).map((shape, index) => (
+      <g opacity={logoKind ? 0.25 : 1}>
+        {artFor(logoKind ? 'miner' : kind).map((shape, index) => (
           <path
             key={index}
             d={shape.path}
@@ -40,9 +40,9 @@ export function Glyph({
           />
         ))}
       </g>
-      {isLogo && (
+      {logoKind && (
         <image
-          href={MINER_LOGO_DATA_URL}
+          href={logoDataUrl(logoKind)}
           x="4"
           y="4"
           width="24"

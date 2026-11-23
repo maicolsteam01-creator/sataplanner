@@ -1,6 +1,7 @@
 import { buildingById, itemById, localized, sampleGameData } from '@sataplanner/game-data';
 import { useAnalysis, useT } from '../hooks';
 import { useAppStore } from '../store';
+import { logoKindForBuilding } from '../lib/minerLogo';
 import { Glyph } from './Glyph';
 
 const fmt = (value: number): string =>
@@ -124,7 +125,7 @@ export function LeftPanel() {
             <div className="inspector-head">
               <span className="dot" style={{ background: category?.color }} />
               <Glyph
-                kind={building.id === 'miner-mk1' ? 'miner-mk1' : building.icon}
+                kind={logoKindForBuilding(building.id) ?? building.icon}
                 size={22}
                 color={category?.color}
               />

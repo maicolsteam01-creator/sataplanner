@@ -2,7 +2,7 @@ import type { Analysis, DesignIssue } from '@sataplanner/engine';
 import { localized, type Building, type GameData } from '@sataplanner/game-data';
 import type { Lang, PlacedNode, ViewMode, Wire } from '../types';
 import { artFor } from './buildingArt';
-import { MINER_LOGO_KIND, minerLogoImage } from './minerLogo';
+import { logoImage, logoKindForBuilding } from './minerLogo';
 import {
   clamp,
   footprintCorners,
@@ -492,10 +492,10 @@ function drawBuildingArt(
   size: number,
 ): void {
   if (s.art === false || size < 20 || typeof Path2D === 'undefined') return;
-  const isMinerLogo = node.buildingId === 'miner-mk1';
-  const icon = isMinerLogo ? MINER_LOGO_KIND : building.icon ?? 'default';
-  const shapes = artFor(isMinerLogo ? 'miner' : icon);
-  if (!shapes?.length && !isMinerLogo) return;
+  const logoKind = logoKindForBuilding(node.buildingId);
+  const icon = logoKind ?? building.icon ?? 'default';
+  const shapes = artFor(logoKind ? 'miner' : icon);
+  if (!shapes?.length && !logoKind) return;
 
   const color = categoryColor(s, building);
   const baseAlpha = ctx.globalAlpha;
@@ -504,7 +504,7 @@ function drawBuildingArt(
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
 
-  const logo = isMinerLogo ? minerLogoImage() : null;
+  const logo = logoKind ? logoImage(logoKind) : null;
   if (logo) {
     const box = 22;
     const ratio = Math.min(box / logo.naturalWidth, box / logo.naturalHeight);

@@ -4,7 +4,7 @@ import { buildingById, sampleGameData } from '@sataplanner/game-data';
 import { useAppStore } from '../store';
 import { useT } from '../hooks';
 import { drawScene } from '../lib/draw';
-import { onMinerLogoReady } from '../lib/minerLogo';
+import { onLogoReady } from '../lib/minerLogo';
 import {
   clamp,
   hitTest,
@@ -113,7 +113,15 @@ export function Stage() {
     return () => canvas.removeEventListener('wheel', handler);
   }, []);
 
-  useEffect(() => onMinerLogoReady(() => setLogoReadyTick((tick) => tick + 1)), []);
+  useEffect(() => {
+    const bump = () => setLogoReadyTick((tick) => tick + 1);
+    const off1 = onLogoReady('miner-mk1', bump);
+    const off2 = onLogoReady('miner-mk2', bump);
+    return () => {
+      off1();
+      off2();
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;

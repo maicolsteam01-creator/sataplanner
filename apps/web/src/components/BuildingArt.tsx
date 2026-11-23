@@ -1,10 +1,10 @@
 import { artFor } from '../lib/buildingArt';
-import { MINER_LOGO_DATA_URL, MINER_LOGO_KIND } from '../lib/minerLogo';
+import { logoDataUrl, logoKindForBuilding } from '../lib/minerLogo';
 
 /**
  * Versión grande del glifo de edificio para tarjetas y vistas de detalle.
  * Comparte el catálogo procedural con Glyph y con el SVG exportado.
- * El Minero Mk.1 muestra su logo raster sobre el calco técnico.
+ * Los Mineros Mk.1 y Mk.2 muestran su logo raster sobre el calco técnico.
  */
 export function BuildingArt({
   kind,
@@ -17,7 +17,7 @@ export function BuildingArt({
   color?: string;
   className?: string;
 }) {
-  const isLogo = kind === MINER_LOGO_KIND;
+  const logoKind = logoKindForBuilding(kind);
   return (
     <svg
       viewBox="0 0 32 32"
@@ -31,8 +31,8 @@ export function BuildingArt({
       aria-hidden="true"
       className={className}
     >
-      <g opacity={isLogo ? 0.25 : 1}>
-        {artFor(isLogo ? 'miner' : kind).map((shape, index) => (
+      <g opacity={logoKind ? 0.25 : 1}>
+        {artFor(logoKind ? 'miner' : kind).map((shape, index) => (
           <path
             key={index}
             d={shape.path}
@@ -43,9 +43,9 @@ export function BuildingArt({
           />
         ))}
       </g>
-      {isLogo && (
+      {logoKind && (
         <image
-          href={MINER_LOGO_DATA_URL}
+          href={logoDataUrl(logoKind)}
           x="4"
           y="4"
           width="24"

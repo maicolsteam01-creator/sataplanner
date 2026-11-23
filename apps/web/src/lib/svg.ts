@@ -2,7 +2,7 @@ import type { Analysis } from '@sataplanner/engine';
 import { localized, type Building, type GameData } from '@sataplanner/game-data';
 import type { Doc, Lang, ViewMode } from '../types';
 import { footprintCorners, project, sortByDepth } from './geometry';
-import { MINER_LOGO_DATA_URL } from './minerLogo';
+import { logoDataUrl, logoKindForBuilding } from './minerLogo';
 
 /**
  * Genera un plano tecnico vectorial, independiente del canvas de pantalla.
@@ -411,12 +411,14 @@ export function buildBlueprintSvg(input: BlueprintInput): string {
       Math.max(...corners.map((c) => c.y)) - Math.min(...corners.map((c) => c.y)),
     );
 
-    if (node.buildingId === 'miner-mk1') {
+    const logoKind = logoKindForBuilding(node.buildingId);
+    if (logoKind) {
+      const logoUrl = logoDataUrl(logoKind);
       const logoSize = Math.min(size * 0.46, 34);
       const lx = (cx - logoSize / 2).toFixed(1);
       const ly = (cy - 8 - logoSize / 2).toFixed(1);
       out.push(
-        `<image href="${MINER_LOGO_DATA_URL}" xlink:href="${MINER_LOGO_DATA_URL}" x="${lx}" y="${ly}" width="${logoSize.toFixed(1)}" height="${logoSize.toFixed(1)}" preserveAspectRatio="xMidYMid meet" opacity="0.9" />`,
+        `<image href="${logoUrl}" xlink:href="${logoUrl}" x="${lx}" y="${ly}" width="${logoSize.toFixed(1)}" height="${logoSize.toFixed(1)}" preserveAspectRatio="xMidYMid meet" opacity="0.9" />`,
       );
     }
 

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { localized, sampleGameData } from '@sataplanner/game-data';
 import { useT } from '../hooks';
 import { useAppStore } from '../store';
+import { logoKindForBuilding } from '../lib/minerLogo';
 import { Glyph } from './Glyph';
 
 export function RightPanel() {
@@ -71,7 +72,7 @@ export function RightPanel() {
               >
                 <span className="catalog-glyph" style={{ color: category.color }}>
                   <Glyph
-                    kind={building.id === 'miner-mk1' ? 'miner-mk1' : building.icon}
+                    kind={logoKindForBuilding(building.id) ?? building.icon}
                     size={26}
                   />
                 </span>
